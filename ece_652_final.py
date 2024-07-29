@@ -18,13 +18,29 @@
 import argparse
 import sys
 
+def get_tasks(filename):
+
+    task_list = []
+    with open(filename, 'r') as file:
+        for line in file:
+            if line.strip():
+                task_execution_time, task_period, task_deadline = map(int, line.strip().split(','))
+                print(f"{task_execution_time}, {task_period} {task_deadline}")
+                task_list.append((task_execution_time, task_period, task_deadline))
+
+    print(task_list)
+    return task_list
+
+
 def main():
     if len(sys.argv) != 2:
         print("[USAGE:] python3 ece_652_final.py <workload_file.txt>")
         return
 
-    file_name = sys.argv[1]
-    print(f"file name is: {file_name}")
+    fileName = sys.argv[1]
+    print(f"file name is: {fileName}")
+
+    task_list = get_tasks(fileName)
 
 if __name__ == "__main__":
     main()
