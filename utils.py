@@ -81,14 +81,142 @@ def is_schedulable(tasks):
 
 
 
-def count_preemptions(task_schedule):
-    preemptions = [0] * len(task_schedule)
-    last_running_task = None
+def get_first_task_run(tasks):
+    r"""
+    Get the first task to run based on the earliest deadline.
 
-    for task_tuple in task_schedule:
-        if task_tuple != last_running_task and last_running_task is not None:
-            preemptions[task_schedule[0].index(task_tuple)] += 1
+    Args:
+        tasks (list): List of Task objects
 
-        last_running_task = task_tuple
+    Returns:
+        Task: The first task to run
+    """
+    tmp_list = order_by_deadline(tasks)
+    return tmp_list[0]
 
-    return preemptions
+
+
+def get_available_tasks(tasks, current_time):
+    """
+    Get the list of tasks that are available at the current time.
+
+    Args:
+        tasks (list): List of Task objects
+        current_time (float): The current time in the timeline
+
+    Returns:
+        list: List of available Task objects
+    """
+    return [task for task in tasks if current_time >= task.next_available]
+
+
+def order_by_deadline(tasks):
+    r"""
+    Order the tasks by their deadlines in ascending order.
+
+    Args:
+        tasks (list): List of Task objects
+
+    Returns:
+        list: List of Task objects ordered by deadlines
+    """
+
+    tasks.sort(key=lambda x: x.deadline)
+    return tasks
+
+
+def available_tasks(tasks, current_time):
+    """
+    Get the list of tasks that are available at the current time.
+
+    Args:
+        tasks (list): List of Task objects
+        current_time (float): The current time in the timeline
+
+    Returns:
+        list: List of available Task objects
+    """
+
+    return [task for task in tasks if current_time >= task.next_available]
+
+
+def preempted(tasks, current_time, expected_executing_task, first_run):
+    """
+    Determine if a task should be preempted by sorting based on the ordered of tasks' deadline
+    If no task is found(Idle time), it returns None
+
+    Args:
+        tasks (list): List of Task objects
+        current_time (float): The current time in the timeline
+        expected_executing_task (Task): The task expected to continue execution
+        first_run (bool): Flag indicating if it's the first run
+
+    Returns:
+        Task: The next task to be executed
+    """
+
+    # Retrieve all available tasks by time
+    available = available_tasks(tasks, current_time)
+
+    if available:
+
+        # List of tasks sorted based on deadline
+        ordered_by_priority = order_by_deadline(available)
+
+        # Preemption is considered from 2nd time unit run
+        if not first_run:
+            print(f"[EVALUATE]: expected_executing_task {expected_executing_task.getName()} with expected_run: {expected_executing_task.getExpectedContinue()}")
+
+            # Check last executed task if it is still expected to run in next evaluation
+            # and it is not finish directly before the next available task with higer priority is available again (finish just-in-time)
+            # and the next higher priority task retrieved is different from it
+            if expected_executing_task.getExpectedContinue() \
+            and expected_executing_task.getAddedTime() != expected_executing_task.getExecutionTime() \
+            and ordered_by_priority[0].getName() != expected_executing_task.getName():
+                print("Preemption should take place here")
+                print(f"{expected_executing_task.getName()} got preempted")
+                # expected_executing_task.preemptions += 1
+            elif expected_executing_task.getAddedTime() == expected_executing_task.getExecutionTime():
+                print("**************************** ALREADY ADDED TO TIMELINE. RESET AND PREPARE TO TRANS NEXT ITER")
+            else:
+                print("**************************RUN NORMAL")
+
+        return ordered_by_priority[0]
+    else:
+        print("Other cases")
+        return None
+
+
+
+def schedule(tasks, total_time, expected_task_first_run):
+    """
+    Main fucntion to schedule the tasks based on the Deadline Monotonic algorithm.
+
+    Args:
+        tasks (list): List of Task objects
+        total_time (float): The total time for the schedule (hyperperiod)
+        expected_task_first_run (Task): The task expected to run first
+
+    Returns:
+        Timeline, list: The timeline and the updated list of tasks
+    """
+    timeline = Timeline(total_time)
+    current_task = None
+    first_run = True
+
+    while timeline.current_time < timeline.total_time:
+        if first_run:
+            task = preempted(tasks, timeline.current_time, expected_task_first_run, True)
+            first_run = False
+        else:
+            task = preempted(tasks, timeline.current_time, expected_task_first_run, False)
+
+        timeline.add_task(task, duration)
+        task.addedtime += duration
+
+        if task is not None:
+            current_task = task
+            expected_task_first_run = task
+
+
+    return timeline, tasks
