@@ -1,6 +1,8 @@
 from math import gcd
 from timeline_class import Timeline
 
+
+
 def LCM(a,b):
     r"""
     Calculate the Least Common Multiplier (LCM) between two integers.
@@ -60,6 +62,7 @@ def get_tasks(filename):
 
 
 
+# NOT USE
 def is_schedulable_using_utilization(tasks):
     r"""
     Check if the task set is schedulable under the Deadline Monotonic algorithm using utilization.
@@ -75,18 +78,24 @@ def is_schedulable_using_utilization(tasks):
     return utilization <= 1
 
 
+
 from math import ceil
 def calculate_response_time(task, higher_priority_tasks):
     """
-        Calculate the worst-case response time for a task using response time analysis.
+    Calculate the worst-case response time for a task using response time analysis.
 
-            Args:
-                    task (Task): The task for which to calculate the response time.
-                            higher_priority_tasks (list): List of higher priority Task objects.
+    Args:
+        task (Task): The task for which to calculate the response time.
+        higher_priority_tasks (list): List of higher priority Task objects.
 
-        Returns:
-                float: The worst-case response time for the task.
+    Returns:
+        float: The worst-case response time for the task.
+
+
+    Reference:
+        The condition is reference from this slide: https://www.cse.wustl.edu/~lu/cse467s/slides/example_sched.pdf
     """
+
     R = task.executiontime
     while True:
         interference = sum(ceil(R / t.period) * t.executiontime for t in higher_priority_tasks)
@@ -102,26 +111,28 @@ def calculate_response_time(task, higher_priority_tasks):
 
 def is_schedulable(tasks):
     """
-        Check if the task set is schedulable under the Deadline Monotonic algorithm using response time analysis.
+    Check if the task set is schedulable under the Deadline Monotonic algorithm using response time analysis.
 
-        Args:
-                tasks (list): List of Task objects.
+    Args:
+        tasks (list): List of Task objects.
 
-                    Returns:
-                            bool: True if schedulable, False otherwise.
-                            """
+    Returns:
+        bool: True if schedulable, False otherwise.
+    """
+
     tasks = order_by_deadline(tasks)
     for i, task in enumerate(tasks):
         higher_priority_tasks = tasks[:i]
         R = calculate_response_time(task, higher_priority_tasks)
         if R > task.deadline:
+
             return False
+
     return True
 
 
 
-
-
+# NOT USE
 def is_schedulable_using_response_time(tasks):
     r"""
     Check if the task set is schedulable under the Deadline Monotonic algorithm using response time analysis.
@@ -144,8 +155,11 @@ def is_schedulable_using_response_time(tasks):
                 break
             R = R_next
         if R > task.deadline:
+
             return False
+
     return True
+
 
 
 def get_first_task_run(tasks):
@@ -159,6 +173,7 @@ def get_first_task_run(tasks):
         Task: The first task to run
     """
     tmp_list = order_by_deadline(tasks)
+
     return tmp_list[0]
 
 
@@ -175,7 +190,9 @@ def order_by_deadline(tasks):
     """
 
     tasks.sort(key=lambda x: x.deadline)
+
     return tasks
+
 
 
 def available_tasks(tasks, current_time):
@@ -191,6 +208,7 @@ def available_tasks(tasks, current_time):
     """
 
     return [task for task in tasks if current_time >= task.next_available]
+
 
 
 def preempted(tasks, current_time, expected_executing_task, first_run):
@@ -226,32 +244,12 @@ def preempted(tasks, current_time, expected_executing_task, first_run):
             if expected_executing_task.getExpectedContinue() \
             and expected_executing_task.getAddedTime() != expected_executing_task.getExecutionTime() \
             and ordered_by_priority[0].getName() != expected_executing_task.getName():
-                #print("Preemption should take place here")
-                #print(f"{expected_executing_task.getName()} got preempted")
                 expected_executing_task.preemptions += 1
-            # elif expected_executing_task.getAddedTime() == expected_executing_task.getExecutionTime():
-            #    print("**************************** ALREADY ADDED TO TIMELINE. RESET AND PREPARE TO TRANS NEXT ITER")
-            # else:
-            #    print("**************************RUN NORMAL")
 
-            #print(f"[EVALUATE]: expected_executing_task {expected_executing_task.getName()} with expected_run: {expected_executing_task.getExpectedContinue()}")
-            #if expected_executing_task.getExpectedContinue() == True:
-            #    finish_before_trans = (expected_executing_task.getAddedTime() == expected_executing_task.getExecutionTime())
-            #
-            #    if not finish_before_trans and (ordered_by_priority[0].getName() != expected_executing_task.getName()):
-            #        print("**************************PREEMPT HAPPENS!!")
-            #        print(f"{expected_executing_task.getName()} got preempted")
-            #        expected_executing_task.preemptions += 1
-            #    elif finish_before_trans:
-            #        print("**************************** ALREADY ADDED TO TIMELINE. RESET AND PREPARE TO TRANS NEXT ITER")
-            #    else:
-            #        print("**************************RUN NORMAL")
-            #else:
-            #    print(f"******************TRANS TO OTHER TASK")
 
         return ordered_by_priority[0]
     else:
-        # print("Other cases")
+
         return None
 
 
@@ -275,6 +273,7 @@ def get_next_event_time(tasks, current_time):
         return min(next_times)
 
     return current_time + 1
+
 
 
 def print_preemptions(tasks):
@@ -304,6 +303,7 @@ def schedule(tasks, total_time, expected_task_first_run):
     Returns:
         Timeline, list: The timeline and the updated list of tasks
     """
+
     timeline = Timeline(total_time)
     current_task = None
     first_run = True
@@ -337,7 +337,7 @@ def schedule(tasks, total_time, expected_task_first_run):
         if task.addedtime < task.executiontime:
             task.expected_continue = True
 
-        # Task added time equal to its execution time
+        # Task added time equal to its execution time (finish executing)
         # Reset parameter, prepare to switch to another task
         else:
             task.addedtime = 0.0
