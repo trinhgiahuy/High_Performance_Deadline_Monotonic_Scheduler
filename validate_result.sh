@@ -13,14 +13,14 @@ read_expected_results() {
     $1 == "Workload" && $2 == workload":" { found=1; next }
     found && $1 == "Workload" { exit }
     found { print }
-    ' "$reference_file"
+    ' "$reference_file" | sed '/^$/d'  # Remove empty lines
 }
 
 for workload_file in workload1.txt workload2.txt workload3.txt workload4.txt workload5.txt workload6.txt; do
     workload_number=$(echo $workload_file | grep -o '[0-9]')
     echo "Workload $workload_number:"
 
-    output=$(python3 ece_652_final.py "$workload_file")
+    output=$(python3 ece_652_final.py "$workload_file" | sed '/^$/d')  # Remove empty lines
 
     expected_output=$(read_expected_results "$workload_number")
 
