@@ -14,16 +14,23 @@ mapfile -t reference < "$REFERENCE_FILE"
 for i in "${!WORKLOAD_FILES[@]}"; do
     workload="${WORKLOAD_FILES[$i]}"
     
-    output=$($PROGRAM "$workload")
-    
-    if [[ "${reference[$i]}" == "$output" ]]; then
+    ref_output=()
+    ref_index=$((i * 3))
+    ref_output+=("${reference[ref_index + 1]}")
+    ref_output+=("${reference[ref_index + 2]}")
+
+    output=($($PROGRAM "$workload"))
+
+    if [[ "${ref_output[@]}" == "${output[@]}" ]]; then
         ((pass_cases++))
         echo "Workload $((i+1)): Pass"
     else
         ((fail_cases++))
         echo "Workload $((i+1)): Fail"
-        echo "Expected: ${reference[$i]}"
-        echo "Got: $output"
+        echo "Expected:"
+        printf "%s\n" "${ref_output[@]}"
+        echo "Got:"
+        printf "%s\n" "${output[@]}"
     fi
     ((total_cases++))
 done
