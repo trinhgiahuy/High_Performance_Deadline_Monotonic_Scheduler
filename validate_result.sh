@@ -1,45 +1,47 @@
 #!/bin/bash
 
-REFERENCE_FILE="expected_results_652.txt"
-WORKLOAD_FILES=("workload1.txt" "workload2.txt" "workload3.txt" "workload4.txt" "workload5.txt" "workload6.txt")
-
-PROGRAM="python3 ece_652_final.py"
+reference_file="expected_results_652.txt"
 
 total_cases=0
 pass_cases=0
 fail_cases=0
 
-mapfile -t reference < "$REFERENCE_FILE"
+read_expected_results() {
+    local workload=$1
+    awk -v workload="$workload" '
+    BEGIN { found=0 }
+    $1 == "Workload" && $2 == workload":" { found=1; next }
+    found && $1 == "Workload" { exit }
+    found { print }
+    ' "$reference_file"
+}
 
-for i in "${!WORKLOAD_FILES[@]}"; do
-    workload="${WORKLOAD_FILES[$i]}"
-    
-    ref_output=()
-    ref_index=$((i * 3))
-    ref_output+=("${reference[ref_index + 1]}")
-    ref_output+=("${reference[ref_index + 2]}")
+for workload_file in workload1.txt workload2.txt workload3.txt workload4.txt workload5.txt workload6.txt; do
+    workload_number=$(echo $workload_file | grep -o '[0-9]')
+    echo "Workload $workload_number:"
 
-    output=($($PROGRAM "$workload"))
+    output=$(python3 ece_652_final.py "$workload_file")
 
-    if [[ "${ref_output[@]}" == "${output[@]}" ]]; then
-        ((pass_cases++))
-        echo "Workload $((i+1)): Pass"
+    expected_output=$(read_expected_results "$workload_number")
+
+    if [ "$output" == "$expected_output" ]; then
+        echo "Pass"
+        pass_cases=$((pass_cases + 1))
     else
-        ((fail_cases++))
-        echo "Workload $((i+1)): Fail"
+        echo "Fail"
         echo "Expected:"
-        printf "%s\n" "${ref_output[@]}"
+        echo "$expected_output"
         echo "Got:"
-        printf "%s\n" "${output[@]}"
+        echo "$output"
+        fail_cases=$((fail_cases + 1))
     fi
-    ((total_cases++))
+
+    total_cases=$((total_cases + 1))
 done
 
-pass_percentage=$((100 * pass_cases / total_cases))
-
+pass_percentage=$(echo "scale=2; ($pass_cases / $total_cases) * 100" | bc)
 echo "Summary:"
 echo "Total cases: $total_cases"
 echo "Pass cases: $pass_cases"
 echo "Fail cases: $fail_cases"
 echo "Pass percentage: $pass_percentage%"
-
