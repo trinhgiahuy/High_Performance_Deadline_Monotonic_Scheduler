@@ -197,7 +197,6 @@ def preempted(tasks, current_time, expected_executing_task, first_run):
             else:
                 print(f"******************TRANS TO OTHER TASK")
 
-
         return ordered_by_priority[0]
     else:
         # print("Other cases")
@@ -221,10 +220,7 @@ def get_next_event_time(tasks, current_time):
     next_times.extend([task.next_available + task.period for task in tasks if task.addedtime < task.executiontime])
 
     if next_times:
-
         return min(next_times)
-
-
     return current_time + 1
 
 

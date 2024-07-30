@@ -18,7 +18,7 @@
 import argparse
 import sys
 from task_class import Task
-from timeline_class import Timeline
+# from timeline_class import Timeline
 from utils import *
 
 
@@ -44,7 +44,7 @@ def main():
     print(hyperperiod)
 
 
-    tasks = [Task(f"T{i}", period, execution_time, deadline) for i, (execution_time, period, deadline) in enumerate(task_list)]
+    tasks = [Task(f"T{i}", execution_time, period, deadline) for i, (execution_time, period, deadline) in enumerate(task_list)]
 
     if is_schedulable(tasks):
         expected_task_first_run = get_first_task_run(tasks)
@@ -52,7 +52,6 @@ def main():
         print_preemptions(tasks)
     else:
         print(0)
-
 
 
 

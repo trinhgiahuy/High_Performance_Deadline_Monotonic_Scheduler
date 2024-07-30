@@ -1,9 +1,9 @@
 class Task:
-    def __init__(self, name, period, executiontime, deadline):
+    def __init__(self, name, executiontime, period, deadline):
         self.period = period
         self.executiontime = executiontime
         self.deadline = deadline
-        self.next_available = 0.0
+        self.next_available = 0
         self.name = name
         self.completed = False      # Completed of the task within each of its period
         self.addedtime = 0.0        # Already executed time in the current period
