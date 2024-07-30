@@ -18,7 +18,7 @@ class Task:
         self.completed = False      # Completed of the task within each of its period
         self.addedtime = 0.0        # Already executed time in the current period
         self.preemptions = 0        # Track number of preemptions
-        self. expected_continue = False
+        self.expected_continue = False
 
 
 
