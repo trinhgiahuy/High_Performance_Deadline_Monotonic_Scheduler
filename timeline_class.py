@@ -1,4 +1,4 @@
-def Timeline:
+class Timeline:
     def __init__(self, total_time):
         self.currenttime = 0.0
         self.totaltime = 10000
@@ -14,4 +14,4 @@ def Timeline:
 
 
     def info(self):
-        return (f"TIMELINE: current time: {self.current_time}     tasks: {self.tasks}"
+        return (f"TIMELINE: current time: {self.current_time}     tasks: {self.tasks}")

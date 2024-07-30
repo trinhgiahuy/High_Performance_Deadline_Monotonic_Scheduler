@@ -1,5 +1,5 @@
 class Task:
-    def __init__(self, id, executiontime, period, deadline):
+    def __init__(self, name, period, executiontime, deadline):
         self.period = period
         self.executiontime = executiontime
         self.deadline = deadline
@@ -22,6 +22,6 @@ class Task:
         return self.expected_continue
 
 
-    def getAddedTime(self)
+    def getAddedTime(self):
         return self.executiontime
 
