@@ -23,5 +23,9 @@ class Task:
 
 
     def getAddedTime(self):
+        return self.addedtime
+
+
+    def getExecutionTime(self):
         return self.executiontime
 
