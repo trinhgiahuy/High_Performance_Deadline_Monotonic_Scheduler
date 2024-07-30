@@ -29,15 +29,15 @@ def calculate_hyperperiod(task_list):
         int: The hyperperiod of the task set.
     """
 
-    print("000")
-    print(task_list)
+    # print("000")
+    # print(task_list)
     hyperperiod = int(task_list[0][1])
-    print(hyperperiod)
+    # print(hyperperiod)
     for _, task_period, _ in task_list[1:]:
         hyperperiod = LCM(int(hyperperiod), int(task_period))
 
-    print(f"Float hyperperiod {float(hyperperiod)}")
-    return float(hyperperiod)
+    # print(f"Float hyperperiod {float(hyperperiod)}")
+    return hyperperiod
 
 
 
@@ -166,7 +166,7 @@ def preempted(tasks, current_time, expected_executing_task, first_run):
 
         # Preemption is considered from 2nd time unit run
         if not first_run:
-            print(f"[EVALUATE]: expected_executing_task {expected_executing_task.getName()} with expected_run: {expected_executing_task.getExpectedContinue()}")
+            # print(f"[EVALUATE]: expected_executing_task {expected_executing_task.getName()} with expected_run: {expected_executing_task.getExpectedContinue()}")
 
             # Check last executed task if it is still expected to run in next evaluation
             # and it is not finish directly before the next available task with higer priority is available again (finish just-in-time)
@@ -177,14 +177,14 @@ def preempted(tasks, current_time, expected_executing_task, first_run):
                 #print("Preemption should take place here")
                 #print(f"{expected_executing_task.getName()} got preempted")
                 expected_executing_task.preemptions += 1
-            elif expected_executing_task.getAddedTime() == expected_executing_task.getExecutionTime():
-                print("**************************** ALREADY ADDED TO TIMELINE. RESET AND PREPARE TO TRANS NEXT ITER")
-            else:
-                print("**************************RUN NORMAL")
+            # elif expected_executing_task.getAddedTime() == expected_executing_task.getExecutionTime():
+            #    print("**************************** ALREADY ADDED TO TIMELINE. RESET AND PREPARE TO TRANS NEXT ITER")
+            # else:
+            #    print("**************************RUN NORMAL")
 
         return ordered_by_priority[0]
     else:
-        print("Other cases")
+        # print("Other cases")
         return None
 
 
@@ -211,6 +211,20 @@ def get_next_event_time(tasks, current_time):
 
     return current_time + 1
 
+
+def print_preemptions(tasks):
+    """
+    Print the number of preemptions for each task.
+
+    Args:
+        tasks (list): List of Task objects
+    """
+    tasks.sort(key=lambda x: x.name)
+    for task in tasks:
+        print(task.getName())
+
+    preemptions = [task.preemptions for task in tasks]
+    print(",".join(map(str, preemptions)))
 
 
 

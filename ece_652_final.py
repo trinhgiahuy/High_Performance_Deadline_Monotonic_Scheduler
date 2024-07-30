@@ -43,14 +43,13 @@ def main():
     hyperperiod = calculate_hyperperiod(task_list)
     print(hyperperiod)
 
-    # task_schedule = is_schedulable(task_list, hyperperiod)
-    # preemptions = count_preemptions(task_schedule)
 
     tasks = [Task(f"T{i}", period, execution_time, deadline) for i, (execution_time, period, deadline) in enumerate(task_list)]
 
     if is_schedulable(tasks):
         expected_task_first_run = get_first_task_run(tasks)
         timeline, tasks = schedule(tasks, hyperperiod, expected_task_first_run)
+        print_preemptions(tasks)
     else:
         print(0)
 
