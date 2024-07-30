@@ -1,4 +1,5 @@
 from math import gcd
+from timeline_class import Timeline
 
 def LCM(a,b):
     r"""
@@ -188,6 +189,31 @@ def preempted(tasks, current_time, expected_executing_task, first_run):
 
 
 
+def get_next_event_time(tasks, current_time):
+    """
+    Get the next event time for the tasks.
+
+    Args:
+        tasks (list): List of Task objects
+        current_time (float): The current time in the timeline
+
+    Returns:
+        float: The next event time
+    """
+
+    next_times = [task.next_available for task in tasks if task.next_available > current_time]
+    next_times.extend([task.next_available + task.period for task in tasks if task.addedtime < task.executiontime])
+
+    if next_times:
+
+        return min(next_times)
+
+
+
+
+
+
+
 def schedule(tasks, total_time, expected_task_first_run):
     """
     Main fucntion to schedule the tasks based on the Deadline Monotonic algorithm.
@@ -210,6 +236,12 @@ def schedule(tasks, total_time, expected_task_first_run):
             first_run = False
         else:
             task = preempted(tasks, timeline.current_time, expected_task_first_run, False)
+
+
+        # Handle the case where the execution time is not necessarily possitive integers with precision up to 0.001
+        remaining_time = task.executiontime - task.addedtime
+        next_event_time = get_next_event_time(tasks, timeline.current_time)
+        duration = min(remaining_time, next_event_time - timeline.current_time)
 
         timeline.add_task(task, duration)
         task.addedtime += duration
