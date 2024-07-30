@@ -17,7 +17,6 @@
 
 import argparse
 import sys
-from math import gcd
 from task_class import Task
 from timeline_class import Timeline
 from utils import *

@@ -1,3 +1,5 @@
+from math import gcd
+
 def LCM(a,b):
     r"""
     Calculate the Least Common Multiplier (LCM) between two integers.
