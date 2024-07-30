@@ -49,8 +49,8 @@ def main():
     tasks = [Task(f"T{i}", period, execution_time, deadline) for i, (execution_time, period, deadline) in enumerate(task_list)]
 
     if is_schedulable(tasks):
-        print("Is schedulable")
-        pass
+        expected_task_first_run = get_first_task_run(tasks)
+        timeline, tasks = schedule(tasks, hyperperiod, expected_task_first_run)
     else:
         print(0)
 
