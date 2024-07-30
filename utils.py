@@ -174,9 +174,9 @@ def preempted(tasks, current_time, expected_executing_task, first_run):
             if expected_executing_task.getExpectedContinue() \
             and expected_executing_task.getAddedTime() != expected_executing_task.getExecutionTime() \
             and ordered_by_priority[0].getName() != expected_executing_task.getName():
-                print("Preemption should take place here")
-                print(f"{expected_executing_task.getName()} got preempted")
-                # expected_executing_task.preemptions += 1
+                #print("Preemption should take place here")
+                #print(f"{expected_executing_task.getName()} got preempted")
+                expected_executing_task.preemptions += 1
             elif expected_executing_task.getAddedTime() == expected_executing_task.getExecutionTime():
                 print("**************************** ALREADY ADDED TO TIMELINE. RESET AND PREPARE TO TRANS NEXT ITER")
             else:
@@ -209,6 +209,7 @@ def get_next_event_time(tasks, current_time):
         return min(next_times)
 
 
+    return current_time + 1
 
 
 
