@@ -231,12 +231,22 @@ def schedule(tasks, total_time, expected_task_first_run):
     current_task = None
     first_run = True
 
+
+    # Main flow cotrol the logic of DM algorithm
     while timeline.current_time < timeline.total_time:
         if first_run:
             task = preempted(tasks, timeline.current_time, expected_task_first_run, True)
             first_run = False
         else:
             task = preempted(tasks, timeline.current_time, expected_task_first_run, False)
+
+
+        # Schedlule the idle time units
+        if task is None:
+            next_event_time = get_next_event_time(tasks, timeline.current_time)
+            timeline.tasks.append(["  ", timeline.current_time, next_event_time])
+            timeline.current_time = next_event_time
+            continue
 
 
         # Handle the case where the execution time is not necessarily possitive integers with precision up to 0.001
@@ -246,6 +256,18 @@ def schedule(tasks, total_time, expected_task_first_run):
 
         timeline.add_task(task, duration)
         task.addedtime += duration
+
+        # Continue add task to the timeline
+        if task.addedtime < task.executiontime:
+            task.expected_continue = True
+
+        # Task added time equal to its execution time
+        # Reset parameter, prepare to switch to another task
+        else:
+            task.addedtime = 0.0
+            task.completed = True
+            task.expected_continue = False
+            task.next_available += task.period
 
         if task is not None:
             current_task = task
