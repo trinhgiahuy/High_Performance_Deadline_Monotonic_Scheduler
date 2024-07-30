@@ -60,9 +60,9 @@ def get_tasks(filename):
 
 
 
-def is_schedulable(tasks):
+def is_schedulable_using_utilization(tasks):
     r"""
-    Check if the task set is schedulable under the Deadline Monotonic algorithm.
+    Check if the task set is schedulable under the Deadline Monotonic algorithm using utilization.
 
     Args:
         tasks (list): List of Task objects
@@ -74,6 +74,78 @@ def is_schedulable(tasks):
     utilization = sum(task.executiontime / min(task.deadline, task.period) for task in tasks)
     return utilization <= 1
 
+
+from math import ceil
+def calculate_response_time(task, higher_priority_tasks):
+    """
+        Calculate the worst-case response time for a task using response time analysis.
+
+            Args:
+                    task (Task): The task for which to calculate the response time.
+                            higher_priority_tasks (list): List of higher priority Task objects.
+
+        Returns:
+                float: The worst-case response time for the task.
+    """
+    R = task.executiontime
+    while True:
+        interference = sum(ceil(R / t.period) * t.executiontime for t in higher_priority_tasks)
+        new_R = task.executiontime + interference
+        if new_R == R:
+            break
+        if new_R > task.deadline:
+            return float('inf')  # Task is not schedulable
+        R = new_R
+    return R
+
+
+
+def is_schedulable(tasks):
+    """
+        Check if the task set is schedulable under the Deadline Monotonic algorithm using response time analysis.
+
+        Args:
+                tasks (list): List of Task objects.
+
+                    Returns:
+                            bool: True if schedulable, False otherwise.
+                            """
+    tasks = order_by_deadline(tasks)
+    for i, task in enumerate(tasks):
+        higher_priority_tasks = tasks[:i]
+        R = calculate_response_time(task, higher_priority_tasks)
+        if R > task.deadline:
+            return False
+    return True
+
+
+
+
+
+def is_schedulable_using_response_time(tasks):
+    r"""
+    Check if the task set is schedulable under the Deadline Monotonic algorithm using response time analysis.
+
+    Args:
+        tasks (list): List of Task objects
+
+    Returns:
+        bool: True if schedulable, False otherwise
+    """
+
+    for i, task in enumerate(tasks):
+        R = task.executiontime
+        while True:
+            R_next = task.executiontime + sum(
+                (R / tasks[j].period) * tasks[j].executiontime
+                for j in range(i)
+            )
+            if R_next == R:
+                break
+            R = R_next
+        if R > task.deadline:
+            return False
+    return True
 
 
 def get_first_task_run(tasks):
