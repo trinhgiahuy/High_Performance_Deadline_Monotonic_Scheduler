@@ -34,14 +34,12 @@ def main():
         return
 
     fileName = sys.argv[1]
-    print(f"file name is: {fileName}")
 
     # Get the list of tasks from the input file
     task_list = get_tasks(fileName)
 
     # Cacluate the hyperperiod of task set
     hyperperiod = calculate_hyperperiod(task_list)
-    print(hyperperiod)
 
 
     tasks = [Task(f"T{i}", execution_time, period, deadline) for i, (execution_time, period, deadline) in enumerate(task_list)]
@@ -49,6 +47,7 @@ def main():
     if is_schedulable(tasks):
         expected_task_first_run = get_first_task_run(tasks)
         timeline, tasks = schedule(tasks, hyperperiod, expected_task_first_run)
+        print(1)
         print_preemptions(tasks)
     else:
         print(0)

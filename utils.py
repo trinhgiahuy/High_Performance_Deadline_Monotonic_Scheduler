@@ -29,14 +29,10 @@ def calculate_hyperperiod(task_list):
         int: The hyperperiod of the task set.
     """
 
-    # print("000")
-    # print(task_list)
     hyperperiod = int(task_list[0][1])
-    # print(hyperperiod)
     for _, task_period, _ in task_list[1:]:
         hyperperiod = LCM(int(hyperperiod), int(task_period))
 
-    # print(f"Float hyperperiod {float(hyperperiod)}")
     return hyperperiod
 
 
@@ -58,10 +54,8 @@ def get_tasks(filename):
         for line in file:
             if line.strip():
                 task_execution_time, task_period, task_deadline = map(float, line.strip().split(','))
-                print(f"{task_execution_time}, {task_period} {task_deadline}")
                 task_list.append((task_execution_time, task_period, task_deadline))
 
-    print(task_list)
     return task_list
 
 
@@ -95,20 +89,6 @@ def get_first_task_run(tasks):
     tmp_list = order_by_deadline(tasks)
     return tmp_list[0]
 
-
-
-def get_available_tasks(tasks, current_time):
-    """
-    Get the list of tasks that are available at the current time.
-
-    Args:
-        tasks (list): List of Task objects
-        current_time (float): The current time in the timeline
-
-    Returns:
-        list: List of available Task objects
-    """
-    return [task for task in tasks if current_time >= task.next_available]
 
 
 def order_by_deadline(tasks):
@@ -171,31 +151,31 @@ def preempted(tasks, current_time, expected_executing_task, first_run):
             # Check last executed task if it is still expected to run in next evaluation
             # and it is not finish directly before the next available task with higer priority is available again (finish just-in-time)
             # and the next higher priority task retrieved is different from it
-            # if expected_executing_task.getExpectedContinue() \
-            # and expected_executing_task.getAddedTime() != expected_executing_task.getExecutionTime() \
-            #and ordered_by_priority[0].getName() != expected_executing_task.getName():
-            #    #print("Preemption should take place here")
-            #    #print(f"{expected_executing_task.getName()} got preempted")
-            #    expected_executing_task.preemptions += 1
+            if expected_executing_task.getExpectedContinue() \
+            and expected_executing_task.getAddedTime() != expected_executing_task.getExecutionTime() \
+            and ordered_by_priority[0].getName() != expected_executing_task.getName():
+                #print("Preemption should take place here")
+                #print(f"{expected_executing_task.getName()} got preempted")
+                expected_executing_task.preemptions += 1
             # elif expected_executing_task.getAddedTime() == expected_executing_task.getExecutionTime():
             #    print("**************************** ALREADY ADDED TO TIMELINE. RESET AND PREPARE TO TRANS NEXT ITER")
             # else:
             #    print("**************************RUN NORMAL")
 
-            print(f"[EVALUATE]: expected_executing_task {expected_executing_task.getName()} with expected_run: {expected_executing_task.getExpectedContinue()}")
-            if expected_executing_task.getExpectedContinue() == True:
-                finish_before_trans = (expected_executing_task.getAddedTime() == expected_executing_task.getExecutionTime())
-
-                if not finish_before_trans and (ordered_by_priority[0].getName() != expected_executing_task.getName()):
-                    print("**************************PREEMPT HAPPENS!!")
-                    print(f"{expected_executing_task.getName()} got preempted")
-                    expected_executing_task.preemptions += 1
-                elif finish_before_trans:
-                    print("**************************** ALREADY ADDED TO TIMELINE. RESET AND PREPARE TO TRANS NEXT ITER")
-                else:
-                    print("**************************RUN NORMAL")
-            else:
-                print(f"******************TRANS TO OTHER TASK")
+            #print(f"[EVALUATE]: expected_executing_task {expected_executing_task.getName()} with expected_run: {expected_executing_task.getExpectedContinue()}")
+            #if expected_executing_task.getExpectedContinue() == True:
+            #    finish_before_trans = (expected_executing_task.getAddedTime() == expected_executing_task.getExecutionTime())
+            #
+            #    if not finish_before_trans and (ordered_by_priority[0].getName() != expected_executing_task.getName()):
+            #        print("**************************PREEMPT HAPPENS!!")
+            #        print(f"{expected_executing_task.getName()} got preempted")
+            #        expected_executing_task.preemptions += 1
+            #    elif finish_before_trans:
+            #        print("**************************** ALREADY ADDED TO TIMELINE. RESET AND PREPARE TO TRANS NEXT ITER")
+            #    else:
+            #        print("**************************RUN NORMAL")
+            #else:
+            #    print(f"******************TRANS TO OTHER TASK")
 
         return ordered_by_priority[0]
     else:
@@ -221,6 +201,7 @@ def get_next_event_time(tasks, current_time):
 
     if next_times:
         return min(next_times)
+
     return current_time + 1
 
 
@@ -232,10 +213,8 @@ def print_preemptions(tasks):
         tasks (list): List of Task objects
     """
     tasks.sort(key=lambda x: x.name)
-    for task in tasks:
-        print(task.preemptions)
-
     preemptions = [task.preemptions for task in tasks]
+
     print(",".join(map(str, preemptions)))
 
 
@@ -257,7 +236,6 @@ def schedule(tasks, total_time, expected_task_first_run):
     current_task = None
     first_run = True
 
-    print(f"total_time {total_time}")
     # Main flow cotrol the logic of DM algorithm
     while timeline.current_time < timeline.total_time:
         if first_run:
