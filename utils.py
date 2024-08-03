@@ -1,6 +1,6 @@
+import math
 from math import gcd
 from timeline_class import Timeline
-
 
 
 def LCM(a,b):
@@ -18,6 +18,10 @@ def LCM(a,b):
 
     return abs(a*b) // gcd(a,b)
 
+def lcm_float(a, b, precision=5):
+    a = round(a, precision)
+    b = round(b, precision)
+    return LCM(int(a*10**precision), int(b*10**precision))/10**precision
 
 
 def calculate_hyperperiod(task_list):
@@ -31,9 +35,13 @@ def calculate_hyperperiod(task_list):
         int: The hyperperiod of the task set.
     """
 
-    hyperperiod = int(task_list[0][1])
+    # hyperperiod = int(task_list[0][1])
+    hyperperiod = task_list[0][1]
+    print(f"first hyper: {hyperperiod}")
     for _, task_period, _ in task_list[1:]:
-        hyperperiod = LCM(int(hyperperiod), int(task_period))
+        # hyperperiod = LCM(int(hyperperiod), int(task_period))
+        print(f"task period: {task_period}")
+        hyperperiod = lcm_float(hyperperiod, task_period)
 
     return hyperperiod
 
