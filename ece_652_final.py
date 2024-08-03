@@ -40,17 +40,19 @@ def main():
 
     # Cacluate the hyperperiod of task set
     hyperperiod = calculate_hyperperiod(task_list)
-
+    print(f"hyperperiod:{hyperperiod}")
 
     tasks = [Task(f"T{i}", execution_time, period, deadline) for i, (execution_time, period, deadline) in enumerate(task_list)]
 
     #if is_schedulable_using_utilization(tasks) and is_schedulable_using_response_time(tasks):
     if is_schedulable(tasks):
+        print("IS SCHEDULABLE")
         expected_task_first_run = get_first_task_run(tasks)
         timeline, tasks = schedule(tasks, hyperperiod, expected_task_first_run)
         print(1)
         print_preemptions(tasks)
     else:
+        print("NOT SCHEDULABLE")
         print(0)
 
 

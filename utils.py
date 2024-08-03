@@ -1,7 +1,7 @@
 import math
 from math import gcd
 from timeline_class import Timeline
-
+import time
 
 def LCM(a,b):
     r"""
@@ -18,11 +18,16 @@ def LCM(a,b):
 
     return abs(a*b) // gcd(a,b)
 
-def lcm_float(a, b, precision=5):
-    a = round(a, precision)
-    b = round(b, precision)
-    return LCM(int(a*10**precision), int(b*10**precision))/10**precision
+def lcm_float(a, b, precision=3):
+   # a = round(a, precision)
+   # b = round(b, precision)
+   # return LCM(int(a*10**precision), int(b*10**precision))/10**precision
+    scale = 10 ** precision
+    a_scaled = int(a * scale)
+    b_scaled = int(b * scale)
+    lcm_scaled = LCM(a_scaled, b_scaled)
 
+    return lcm_scaled / scale
 
 def calculate_hyperperiod(task_list):
     r"""
@@ -252,6 +257,7 @@ def preempted(tasks, current_time, expected_executing_task, first_run):
             if expected_executing_task.getExpectedContinue() \
             and expected_executing_task.getAddedTime() != expected_executing_task.getExecutionTime() \
             and ordered_by_priority[0].getName() != expected_executing_task.getName():
+                print(f"PREEMPTION HAPPEN HERE at current time {current_time}")
                 expected_executing_task.preemptions += 1
 
 
@@ -311,9 +317,10 @@ def schedule(tasks, total_time, expected_task_first_run):
     Returns:
         Timeline, list: The timeline and the updated list of tasks
     """
-
+    print(f"total_time: {total_time}")
     timeline = Timeline(total_time)
     current_task = None
+
     first_run = True
 
     # Main flow cotrol the logic of DM algorithm
@@ -338,6 +345,11 @@ def schedule(tasks, total_time, expected_task_first_run):
         next_event_time = get_next_event_time(tasks, timeline.current_time)
         duration = min(remaining_time, next_event_time - timeline.current_time)
 
+
+        # DEBUG output
+        print(f"Scheduling Task: {task.name}")
+        print(f"Current Time: {timeline.current_time}, Task Duration: {duration}, Remaining Time: {remaining_time}, Next Event Time: {next_event_time}")
+
         timeline.add_task(task, duration)
         task.addedtime += duration
 
@@ -352,10 +364,19 @@ def schedule(tasks, total_time, expected_task_first_run):
             task.completed = True
             task.expected_continue = False
             task.next_available += task.period
+            # task.next_available = timeline.current_time + task.period
+
+
+        # timeline.current_time += duration  # Ensure current_time advances
 
         if task is not None:
             current_task = task
             expected_task_first_run = task
 
+        # Avoid infinite loop
+        if timeline.current_time >= total_time:
+            print("AVOID INFINITELOOP")
+            break
 
+        time.sleep(1)
     return timeline, tasks
