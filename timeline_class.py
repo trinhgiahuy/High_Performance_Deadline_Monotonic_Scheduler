@@ -1,3 +1,6 @@
+import math
+
+
 class Timeline:
     def __init__(self, total_time):
         """
@@ -8,7 +11,7 @@ class Timeline:
         """
 
         self.current_time = 0.0
-        self.total_time = total_time
+        self.total_time = round(total_time, 3)
         self.tasks = []
 
 
@@ -22,8 +25,8 @@ class Timeline:
             duration (float): The duration for which the task will be executed.
         """
 
-        fromtime = self.current_time
-        endtime = fromtime + duration
+        fromtime = round(self.current_time, 3)
+        endtime = round(fromtime + duration, 3)
         self.tasks.append([task.name, fromtime, endtime])
         self.current_time = endtime
 

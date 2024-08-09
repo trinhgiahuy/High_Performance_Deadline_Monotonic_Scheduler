@@ -10,8 +10,8 @@ class Task:
             deadline (float): The deadline of the task.
         """
 
-        self.period = period
-        self.executiontime = executiontime
+        self.period = round(period,3)
+        self.executiontime = round(executiontime,3)
         self.deadline = deadline
         self.next_available = 0
         self.name = name
