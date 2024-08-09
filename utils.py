@@ -283,7 +283,7 @@ def get_next_event_time(tasks, current_time):
     """
     # print(f"[get_next_event_time]current time {current_time}: tasks: {tasks}")
     next_times = [task.next_available for task in tasks if task.next_available > current_time]
-    next_times.extend([task.next_available + task.period for task in tasks if task.addedtime < task.executiontime])
+    next_times.extend([round(task.next_available + task.period,3) for task in tasks if task.addedtime < task.executiontime])
 
 
     # Remove any times that are less than or equal to the current time
@@ -294,12 +294,15 @@ def get_next_event_time(tasks, current_time):
     if next_times:
         next_event_time = min(next_times)
         # QUEST: Shall we remove the next_event_time from the list??
+        next_times = [time for time in next_times if time != next_event_time]
         # next_event_index = next_times.index(next_event_time)
         # next_times.pop(next_event_index)  # Remove the next event time from the list
         print(f"[DEBUG] Next event time: {next_event_time}")  # Debug
-        return next_event_time
+        print(f"[DEBUG] Next event times after remove: {next_times}")  # Debug
 
-    return current_time + 1
+        return round(next_event_time,3)
+
+    return round(current_time + 1,3)
 
 
 
@@ -335,7 +338,7 @@ def schedule(tasks, total_time, expected_task_first_run):
     current_task = None
 
     first_run = True
-
+    last_event_time = None
     # Main flow cotrol the logic of DM algorithm
     while timeline.current_time < timeline.total_time:
         if first_run:
@@ -357,7 +360,11 @@ def schedule(tasks, total_time, expected_task_first_run):
         # Handle the case where the execution time is not necessarily possitive integers with precision up to 0.001
         remaining_time = round(task.executiontime - task.addedtime, 3)
         next_event_time = get_next_event_time(tasks, timeline.current_time)
-        duration = min(remaining_time, round(next_event_time - timeline.current_time,3))
+
+        if next_event_time == last_event_time:
+            print("NO CHANGE FROM LAST")
+        else:
+            duration = min(remaining_time, round(next_event_time - timeline.current_time,3))
         print(f"[remaining_time {remaining_time}], next_event_time:{next_event_time}, timeline.current_time: {timeline.current_time}")
         print(f"get min {duration}")
         # Ensure we have positive duration
@@ -371,7 +378,7 @@ def schedule(tasks, total_time, expected_task_first_run):
 
 
         timeline.add_task(task, duration)
-        task.addedtime += duration
+        task.addedtime = round(task.addedtime + duration, 3)
         print(f"timeline info: {timeline.info()}")
         print(f"task info {task.info()}")
 
@@ -402,5 +409,6 @@ def schedule(tasks, total_time, expected_task_first_run):
             print("AVOID INFINITELOOP")
             break
 
-        time.sleep(1)
+        last_event_time = next_event_time
+        # time.sleep(1)
     return timeline, tasks
