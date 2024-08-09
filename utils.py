@@ -241,11 +241,13 @@ def preempted(tasks, current_time, expected_executing_task, first_run):
 
     # Retrieve all available tasks by time
     available = available_tasks(tasks, current_time)
+    print(f"[{current_time}]------------ Available tasks at time {current_time}: {[task.getName() for task in available]}")  # Debug
 
     if available:
 
         # List of tasks sorted based on deadline
         ordered_by_priority = order_by_deadline(available)
+        print(f"[DEBUG] Ordered tasks by priority: {[task.getName() for task in ordered_by_priority]}")  # Debug
 
         # Preemption is considered from 2nd time unit run
         if not first_run:
@@ -257,7 +259,7 @@ def preempted(tasks, current_time, expected_executing_task, first_run):
             if expected_executing_task.getExpectedContinue() \
             and expected_executing_task.getAddedTime() != expected_executing_task.getExecutionTime() \
             and ordered_by_priority[0].getName() != expected_executing_task.getName():
-                print(f"PREEMPTION HAPPEN HERE at current time {current_time}")
+                print(f"[DEBUG] PREEMPTION HAPPEN HERE at current time {current_time}")  # Debug
                 expected_executing_task.preemptions += 1
 
 
@@ -279,12 +281,23 @@ def get_next_event_time(tasks, current_time):
     Returns:
         float: The next event time
     """
-
+    # print(f"[get_next_event_time]current time {current_time}: tasks: {tasks}")
     next_times = [task.next_available for task in tasks if task.next_available > current_time]
     next_times.extend([task.next_available + task.period for task in tasks if task.addedtime < task.executiontime])
 
+
+    # Remove any times that are less than or equal to the current time
+    # next_times = [time for time in next_times if time > current_time]
+
+    print(f"[DEBUG] Next event times: {next_times}")  # Debug
+
     if next_times:
-        return min(next_times)
+        next_event_time = min(next_times)
+        # QUEST: Shall we remove the next_event_time from the list??
+        # next_event_index = next_times.index(next_event_time)
+        # next_times.pop(next_event_index)  # Remove the next event time from the list
+        print(f"[DEBUG] Next event time: {next_event_time}")  # Debug
+        return next_event_time
 
     return current_time + 1
 
@@ -317,7 +330,7 @@ def schedule(tasks, total_time, expected_task_first_run):
     Returns:
         Timeline, list: The timeline and the updated list of tasks
     """
-    print(f"total_time: {total_time}")
+    print(f"[DEBUG] total_time: {total_time}")  # Debug
     timeline = Timeline(total_time)
     current_task = None
 
@@ -335,40 +348,51 @@ def schedule(tasks, total_time, expected_task_first_run):
         # Schedlule the idle time units
         if task is None:
             next_event_time = get_next_event_time(tasks, timeline.current_time)
+            print(f"[DEBUG] Idle time from {timeline.current_time} to {next_event_time}")  # Debug
             timeline.tasks.append(["  ", timeline.current_time, next_event_time])
             timeline.current_time = next_event_time
             continue
 
 
         # Handle the case where the execution time is not necessarily possitive integers with precision up to 0.001
-        remaining_time = task.executiontime - task.addedtime
+        remaining_time = round(task.executiontime - task.addedtime, 3)
         next_event_time = get_next_event_time(tasks, timeline.current_time)
-        duration = min(remaining_time, next_event_time - timeline.current_time)
-
+        duration = min(remaining_time, round(next_event_time - timeline.current_time,3))
+        print(f"[remaining_time {remaining_time}], next_event_time:{next_event_time}, timeline.current_time: {timeline.current_time}")
+        print(f"get min {duration}")
+        # Ensure we have positive duration
+        if duration <= 0:
+            print(f"[DEBUG] Non-positive duration detected. Current Time: {timeline.current_time}, Task: {task.name}, Duration: {duration}")
+            break
 
         # DEBUG output
-        print(f"Scheduling Task: {task.name}")
-        print(f"Current Time: {timeline.current_time}, Task Duration: {duration}, Remaining Time: {remaining_time}, Next Event Time: {next_event_time}")
+        print(f"[DEBUG] Scheduling Task: {task.name}")
+        print(f"[DEBUG] Current Time: {timeline.current_time}, Task Duration: {duration}, Remaining Time: {remaining_time}, Next Event Time: {next_event_time}")
+
 
         timeline.add_task(task, duration)
         task.addedtime += duration
+        print(f"timeline info: {timeline.info()}")
+        print(f"task info {task.info()}")
 
         # Continue add task to the timeline
         if task.addedtime < task.executiontime:
+            print(f"[*] Add task to timeline")
             task.expected_continue = True
 
         # Task added time equal to its execution time (finish executing)
         # Reset parameter, prepare to switch to another task
         else:
+            print(f"[*] Task = exec time")
             task.addedtime = 0.0
             task.completed = True
             task.expected_continue = False
-            task.next_available += task.period
+            task.next_available = round(task.next_available + task.period,3)
             # task.next_available = timeline.current_time + task.period
+            print(f"task info {task.info()}")
 
-
-        # timeline.current_time += duration  # Ensure current_time advances
-
+        # timeline.current_time = round(timeline.current_time + duration, 3)  # Ensure current_time advances
+        timeline.current_time = round(timeline.current_time, 3)
         if task is not None:
             current_task = task
             expected_task_first_run = task
